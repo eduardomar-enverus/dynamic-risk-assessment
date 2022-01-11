@@ -40,18 +40,17 @@ def check_drift(dataframe):
         boolean: True if the model is drifted, False otherwise
     """
 
-    # Step 1: Read ingestedfiles.txt from production deployment folder
+    # Reading ingestedfiles.txt from production deployment folder
     with open(deployed_ingested_files) as files:
         ingested_files = files.readlines()
         ingested_files = [line.rstrip() for line in ingested_files]
 
-    # Step 2: Determine whether the source data folder has files that aren't
+    # Check whether source files are same as ingested files
     source_files = find_csv_files(input_folder_path)
-
-    # If new data is not found, we can proceed. otherwise, we have to ingest new data
 
     if set(ingested_files) == set(source_files):
         return False
+
     else:
         # Ingesting new data
         ingestion.merge_multiple_dataframe()
@@ -67,12 +66,12 @@ def check_drift(dataframe):
         y_pred = diagnostics.model_predictions(features)
         new_score = f1_score(label.values, y_pred)
 
-        # Deciding whether to proceed, part 2
-        print("Deployed score = %s", deployed_score)
+        # Printing new vs stored scores
+        print("Stored score = %s", stored_score)
         print("New score = %s", new_score)
 
         # Check if model drifting happened
-        if new_score < deployed_score:  # if new score is greater than deployed score
+        if new_score < stored_score:  # if new score is greater than deployed score
             print("Drift occurred")
             return True
         else:
@@ -82,13 +81,13 @@ def check_drift(dataframe):
 
 def retrain(dataframe):
     print("Retraining")
-    training.train_model(dataframe)
+    training.train_model()
 
     print("Rescoring")
     scoring.score_model()
 
     print("Redeploying")
-    deployment.store_files()
+    deployment.store_model_into_pickle()
 
     print("Running API calls and reporting")
     os.system("python reporting.py")

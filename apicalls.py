@@ -18,7 +18,7 @@ api_returns = os.path.join(output_model_path, "apireturns2.txt")
 with open(api_returns, "w") as file:
     file.write("API Returns Data: \n")
 
-    file.write("Data Statistics Summary\n")
+    file.write("Data Statistics\n")
     file.write(requests.get(f"{URL}/summarystats").text)
     file.write("\n")
 
@@ -26,7 +26,7 @@ with open(api_returns, "w") as file:
     file.write(requests.get(f"{URL}/diagnostics").text)
     file.write("\n")
 
-    file.write("Model Predictions on Test Data\n")
+    file.write("Predictions\n")
     file.write(
         requests.post(
             f"{URL}/prediction", json={"prediction_file_path": prediction_file}
@@ -34,4 +34,4 @@ with open(api_returns, "w") as file:
     )
     file.write("\n")
 
-    file.write("Model Score: " + requests.get(f"{URL}/scoring").text)
+    file.write("Model F1 Score: " + requests.get(f"{URL}/scoring").text)
