@@ -79,7 +79,7 @@ def check_drift(dataframe):
             return False
 
 
-def retrain(dataframe):
+def retrain():
     print("Retraining")
     training.train_model()
 
@@ -99,4 +99,4 @@ if __name__ == "__main__":
 
     DRIFT_CHECK = check_drift(input_dataframe)
     if DRIFT_CHECK is True:
-        retrain(input_dataframe)
+        retrain()
