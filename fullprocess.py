@@ -81,28 +81,23 @@ def check_drift(dataframe):
 
 
 def retrain(dataframe):
-    """
-    re-training and re-deploy the model
-    """
-
-    print("Re-training model")
+    print("Retraining")
     training.train_model(dataframe)
 
-    print("Re-scoring model")
+    print("Rescoring")
     scoring.score_model()
 
-    print("Re-deploying model")
+    print("Redeploying")
     deployment.store_files()
 
-    print("Running diagnostics and reporting")
+    print("Running API calls and reporting")
     os.system("python reporting.py")
-
     os.system("python apicalls.py")
 
 
 if __name__ == "__main__":
     input_dataframe = pd.read_csv(os.path.join(dataset_path, "finaldata.csv"))
 
-    DRIFT = check_drift(input_dataframe)
-    # if DRIFT is True:  # drift happened
-    #     retrain(input_dataframe)
+    DRIFT_CHECK = check_drift(input_dataframe)
+    if DRIFT_CHECK is True:
+        retrain(input_dataframe)
