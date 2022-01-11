@@ -16,15 +16,15 @@ dataset_csv_path = os.path.join(config["output_folder_path"])
 test_data_path = os.path.join(config["test_data_path"])
 production_deployment_path = os.path.join(config["prod_deployment_path"])
 
+# Load test data
+test_data = pd.read_csv(os.path.join(test_data_path, "testdata.csv"))
+y_true = test_data.pop("exited")
+test_data = test_data.drop(columns=["corporation"])
 
-def model_predictions():
+def model_predictions(test_data):
     # Load trained model
     model = joblib.load(os.path.join(production_deployment_path, "trainedmodel.pkl"))
 
-    # Load test data
-    test_data = pd.read_csv(os.path.join(test_data_path, "testdata.csv"))
-    y_true = test_data.pop("exited")
-    test_data = test_data.drop(columns=["corporation"])
     # Predictions
     predictions = model.predict(test_data)
     return predictions
@@ -32,26 +32,28 @@ def model_predictions():
 
 def dataframe_summary():
     data = pd.read_csv(os.path.join(dataset_csv_path, "finaldata.csv"))
-    data = data.drop(columns=["exited", "corporation"])
+    data_numbers = data.drop(
+        ['exited'], axis=1).select_dtypes('number')
 
-    summary_stats = data.agg(
-        {
-            "lastmonth_activity": ["min", "max", "mean", "median", "std"],
-            "lastyear_activity": ["min", "max", "mean", "median", "std"],
-            "number_of_employees": ["min", "max", "mean", "median", "std"],
-        }
-    )
+    statistics_dict = {}
+    for column in data_numbers.columns:
+        mean = data_numbers[column].mean()
+        median = data_numbers[column].median()
+        std = data_numbers[column].std()
 
-    return summary_stats
+        statistics_dict[column] = {
+            'mean': round(mean, 3),
+            'median': round(median, 3),
+            'std': round(std, 3)}
+
+    return statistics_dict
 
 
 def missing_data():
     data = pd.read_csv(os.path.join(dataset_csv_path, "finaldata.csv"))
-    percent_missing = ((data.isnull() | data.isna()).sum() * 100 / data.index.size).round(2)
-    missing_value_df = pd.DataFrame(
-        {"column_name": data.columns, "percent_missing": percent_missing}
-    )
-    return missing_value_df
+    missing_list = {col: {'percentage': percentage} for col, percentage in zip(
+        data.columns, data.isna().sum() / data.shape[0] * 100)}
+    return missing_list
 
 
 def execution_time():
@@ -63,21 +65,27 @@ def execution_time():
     os.system("python3 ingestion.py")
     ingestion_time = timeit.default_timer() - start_time
 
-    run_times = [training_time, ingestion_time]
+    run_times = [
+        {'ingestion_time': round(ingestion_time, 3)},
+        {'training_time': round(training_time, 3)}
+    ]
     return run_times
 
 
 def outdated_packages_list():
-    outdated_list = subprocess.check_output(
-        ["python", "-m", "pip", "list", "--outdated"]
-    )
-    with open("outdated_package_list.txt", "wb") as f:
-        f.write(outdated_list)
+    dep = subprocess.run(
+       [ 'pip', 'list', '--outdated'],stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding='utf-8').stdout
+    return dep
 
 
 if __name__ == "__main__":
-    model_predictions()
-    dataframe_summary()
-    missing_data()
-    execution_time()
-    outdated_packages_list()
+    # model_predictions()
+    # dataframe_summary()
+    # missing_data()
+    # execution_time()
+    # outdated_packages_list()
+
+    print("Outdated Packages")
+    print(outdated_packages_list())

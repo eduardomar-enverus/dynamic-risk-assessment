@@ -45,6 +45,8 @@ def score_model():
         with redirect_stdout(f):
             print(f"{round(f1_score,4)}")
 
+    return str(round(f1_score,4))
+
 
 if __name__ == "__main__":
     score_model()

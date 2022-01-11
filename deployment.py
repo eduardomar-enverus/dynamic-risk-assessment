@@ -20,7 +20,6 @@ model_path = os.path.join(config["output_model_path"])
 prod_deployment_path = os.path.join(config["prod_deployment_path"])
 
 
-####################function for deployment
 def store_model_into_pickle():
     """
 
