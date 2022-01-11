@@ -13,7 +13,7 @@ test_data_path = config["test_data_path"]
 prediction_file = os.path.join(test_data_path, "testdata.csv")
 output_model_path = config["output_model_path"]
 
-api_returns = os.path.join(output_model_path, "apireturns.txt")
+api_returns = os.path.join(output_model_path, "apireturns2.txt")
 
 with open(api_returns, "w") as file:
     file.write("API Returns Data: \n")

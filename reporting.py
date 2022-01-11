@@ -39,7 +39,7 @@ def score_model():
 
     sns.heatmap(confusion_matrix, annot=True)
     plt.show()
-    plt.savefig(os.path.join(output_model_path, "confusionmatrix.png"))
+    plt.savefig(os.path.join(output_model_path, "confusionmatrix2.png"))
 
 
 if __name__ == "__main__":
