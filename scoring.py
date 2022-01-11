@@ -13,12 +13,12 @@ import json
 
 
 #################Load config.json and get path variables
-with open('config.json','r') as f:
-    config = json.load(f) 
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-dataset_csv_path = os.path.join(config['output_folder_path']) 
-test_data_path = os.path.join(config['test_data_path']) 
-model_path = os.path.join(config['output_model_path'])
+dataset_csv_path = os.path.join(config["output_folder_path"])
+test_data_path = os.path.join(config["test_data_path"])
+model_path = os.path.join(config["output_model_path"])
 
 #################Function for model scoring
 def score_model():
@@ -29,19 +29,19 @@ def score_model():
     """
 
     # Load trained model
-    model = joblib.load(os.path.join(model_path,'trainedmodel.pkl'))
+    model = joblib.load(os.path.join(model_path, "trainedmodel.pkl"))
 
     # Load test data
-    test_data = pd.read_csv(os.path.join(test_data_path,'testdata.csv'))
-    y_true = test_data.pop('exited')
-    test_data = test_data.drop(columns=['corporation'])
+    test_data = pd.read_csv(os.path.join(test_data_path, "testdata.csv"))
+    y_true = test_data.pop("exited")
+    test_data = test_data.drop(columns=["corporation"])
     # Predictions
     predictions = model.predict(test_data)
 
     # F1 score
     f1_score = metrics.f1_score(y_true, predictions, zero_division=1)
 
-    with open('latestscore.txt', 'w') as f:
+    with open("latestscore.txt", "w") as f:
         with redirect_stdout(f):
             print(f"{round(f1_score,4)}")
 

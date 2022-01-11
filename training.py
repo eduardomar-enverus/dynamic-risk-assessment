@@ -39,9 +39,9 @@ def train_model():
     )
 
     # fit the logistic regression to your data
-    data = pd.read_csv(os.path.join(dataset_csv_path,'finaldata.csv'))
-    y = data['exited']
-    X = data.drop(columns=['exited', 'corporation'])
+    data = pd.read_csv(os.path.join(dataset_csv_path, "finaldata.csv"))
+    y = data["exited"]
+    X = data.drop(columns=["exited", "corporation"])
     clf = lr.fit(X, y)
 
     # If trained model folder does not exist create one
