@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 import re
@@ -12,14 +13,22 @@ import deployment
 import diagnostics
 import reporting
 
-with open('./config.json', 'r') as file:
+with open("./config.json", "r") as file:
     config = json.load(file)
 
-input_folder_path = config['input_folder_path']
-dataset_path = config['output_folder_path']
-prod_deployment_path = config['prod_deployment_path']
+input_folder_path = config["input_folder_path"]
+dataset_path = config["output_folder_path"]
+prod_deployment_path = config["prod_deployment_path"]
+deployed_score = os.path.join(prod_deployment_path, "latestscore.txt")
 deployed_ingested_files = os.path.join(prod_deployment_path, "ingestedfiles.txt")
-deployed_model = os.path.join(prod_deployment_path, "latestscore.txt")
+
+
+def find_csv_files(path):
+    files = []
+    for file in os.listdir(path):
+        if file.endswith(".csv"):
+            files.append(file)
+    return files
 
 
 def check_drift(dataframe):
@@ -30,31 +39,27 @@ def check_drift(dataframe):
     Returns:
         boolean: True if the model is drifted, False otherwise
     """
-    # Check and read new data
-    new_data = False
 
     # Step 1: Read ingestedfiles.txt from production deployment folder
-    with open(deployed_ingested_files) as file:
-        ingested_files = {line.strip('\n') for line in file.readlines()}
+    with open(deployed_ingested_files) as files:
+        ingested_files = files.readlines()
+        ingested_files = [line.rstrip() for line in ingested_files]
 
     # Step 2: Determine whether the source data folder has files that aren't
-    # listed in ingestedfiles.txt
-    source_files = set(os.listdir(input_folder_path))
+    source_files = find_csv_files(input_folder_path)
 
     # If new data is not found, we can proceed. otherwise, we have to ingest new data
-    if len(source_files.difference(ingested_files)) != 0:
+
+    if set(ingested_files) == set(source_files):
         return False
     else:
         # Ingesting new data
         ingestion.merge_multiple_dataframe()
 
-        # Step 3: Checking for model drift
-
-        # Check whether the score from the deployed model is different from the
-        # score from the model that uses the newest ingested data
-        with open(deployed_model) as temp_file:
-            deployed_score = re.findall(r'\d*\.?\d+', temp_file.read())[0]
-            deployed_score = float(deployed_score)
+        # Checking for model drift
+        with open(deployed_score) as score_file:
+            stored_score = score_file.read()
+            stored_score = float(stored_score)
 
         label = dataframe["exited"]
         features = dataframe.drop(["exited", "corporation"], axis=1)
@@ -73,6 +78,7 @@ def check_drift(dataframe):
         else:
             print("No drift")
             return False
+
 
 def retrain(dataframe):
     """
@@ -94,12 +100,9 @@ def retrain(dataframe):
     os.system("python apicalls.py")
 
 
-if __name__ == '__main__':
-    input_dataframe = pd.read_csv(
-        os.path.join(
-            dataset_path,
-            'finaldata.csv'))
+if __name__ == "__main__":
+    input_dataframe = pd.read_csv(os.path.join(dataset_path, "finaldata.csv"))
 
     DRIFT = check_drift(input_dataframe)
-    if DRIFT is True:  # drift happened
-        retrain(input_dataframe)
+    # if DRIFT is True:  # drift happened
+    #     retrain(input_dataframe)

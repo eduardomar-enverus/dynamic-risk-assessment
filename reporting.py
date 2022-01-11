@@ -23,11 +23,10 @@ output_model_path = os.path.join(config["output_model_path"])
 
 def score_model():
 
-
     # Load test data
     test_data = pd.read_csv(os.path.join(test_data_path, "testdata.csv"))
 
-    predictions = model_predictions(test_data.drop(columns=["corporation","exited"]))
+    predictions = model_predictions(test_data.drop(columns=["corporation", "exited"]))
 
     y_true = test_data.pop("exited")
 
@@ -40,7 +39,7 @@ def score_model():
 
     sns.heatmap(confusion_matrix, annot=True)
     plt.show()
-    plt.savefig(os.path.join(output_model_path,'confusionmatrix.png'))
+    plt.savefig(os.path.join(output_model_path, "confusionmatrix.png"))
 
 
 if __name__ == "__main__":

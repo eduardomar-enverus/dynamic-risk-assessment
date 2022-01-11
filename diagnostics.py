@@ -21,6 +21,7 @@ test_data = pd.read_csv(os.path.join(test_data_path, "testdata.csv"))
 y_true = test_data.pop("exited")
 test_data = test_data.drop(columns=["corporation"])
 
+
 def model_predictions(test_data):
     # Load trained model
     model = joblib.load(os.path.join(production_deployment_path, "trainedmodel.pkl"))
@@ -32,8 +33,7 @@ def model_predictions(test_data):
 
 def dataframe_summary():
     data = pd.read_csv(os.path.join(dataset_csv_path, "finaldata.csv"))
-    data_numbers = data.drop(
-        ['exited'], axis=1).select_dtypes('number')
+    data_numbers = data.drop(["exited"], axis=1).select_dtypes("number")
 
     statistics_dict = {}
     for column in data_numbers.columns:
@@ -42,17 +42,22 @@ def dataframe_summary():
         std = data_numbers[column].std()
 
         statistics_dict[column] = {
-            'mean': round(mean, 3),
-            'median': round(median, 3),
-            'std': round(std, 3)}
+            "mean": round(mean, 3),
+            "median": round(median, 3),
+            "std": round(std, 3),
+        }
 
     return statistics_dict
 
 
 def missing_data():
     data = pd.read_csv(os.path.join(dataset_csv_path, "finaldata.csv"))
-    missing_list = {col: {'percentage': percentage} for col, percentage in zip(
-        data.columns, data.isna().sum() / data.shape[0] * 100)}
+    missing_list = {
+        col: {"percentage": percentage}
+        for col, percentage in zip(
+            data.columns, data.isna().sum() / data.shape[0] * 100
+        )
+    }
     return missing_list
 
 
@@ -66,17 +71,19 @@ def execution_time():
     ingestion_time = timeit.default_timer() - start_time
 
     run_times = [
-        {'ingestion_time': round(ingestion_time, 3)},
-        {'training_time': round(training_time, 3)}
+        {"ingestion_time": round(ingestion_time, 3)},
+        {"training_time": round(training_time, 3)},
     ]
     return run_times
 
 
 def outdated_packages_list():
     dep = subprocess.run(
-       [ 'pip', 'list', '--outdated'],stdout=subprocess.PIPE,
+        ["pip", "list", "--outdated"],
+        stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        encoding='utf-8').stdout
+        encoding="utf-8",
+    ).stdout
     return dep
 
 
